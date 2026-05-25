@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plano de Treino Elite — 30 Dias</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; }
+    body {
+      background: #0A0A0C;
+      color: #F0F0F0;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #0A0A0C; }
+    ::-webkit-scrollbar-thumb { background: #2A2A38; border-radius: 2px; }
+    button { cursor: pointer; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const plan = {
+  days: [
+    {
+      id: "seg", label: "SEG", fullLabel: "SEGUNDA",
+      title: "PEITO + TRÍCEPS", tag: "Empurrar",
+      color: "#E8523A", duration: "~55 min",
+      sections: [
+        { name: "AQUECIMENTO", icon: "🔥", exercises: [
+          { name: "Esteira inclinada leve", sets: "5 min", reps: "—", rest: "—", note: "Eleve a FC antes de começar" },
+        ]},
+        { name: "PEITO", icon: "💪", exercises: [
+          { name: "Supino Inclinado Halter", sets: "4", reps: "8–10", rest: "60s", note: "Composto prioritário. Controle na descida (2s)" },
+          { name: "Supino Máquina Convergente", sets: "4", reps: "10–12", rest: "50s", note: "Esprema no topo — pico de contração" },
+          { name: "Crucifixo Máquina", sets: "3", reps: "12–15", rest: "40s", note: "Foco total na abertura e fechamento" },
+          { name: "Crossover Polia Alta", sets: "3", reps: "12–15", rest: "35s", note: "Última série: drop set obrigatório" },
+        ]},
+        { name: "TRÍCEPS", icon: "⚡", exercises: [
+          { name: "Tríceps Corda Polia", sets: "3", reps: "12–15", rest: "40s", note: "Abra as pontas no final — contração máxima" },
+          { name: "Tríceps Francês Unilateral", sets: "3", reps: "10–12", rest: "40s", note: "Controle total — sem balanço" },
+          { name: "Paralela Assistida", sets: "2", reps: "Falha", rest: "45s", note: "Vá até a falha real na última" },
+        ]},
+        { name: "CARDIO FINAL", icon: "🏃", exercises: [
+          { name: "Escada ou Esteira Inclinada", sets: "12 min", reps: "—", rest: "—", note: "Ritmo moderado-intenso. Inclinação 8–12%" },
+        ]},
+      ],
+    },
+    {
+      id: "ter", label: "TER", fullLabel: "TERÇA",
+      title: "COSTAS + BÍCEPS + ABD", tag: "Puxar",
+      color: "#3A7BE8", duration: "~55 min",
+      sections: [
+        { name: "AQUECIMENTO", icon: "🔥", exercises: [
+          { name: "Rotação de ombros + Pulldown leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito e prepare a escápula" },
+        ]},
+        { name: "COSTAS", icon: "🏋️", exercises: [
+          { name: "Barra Fixa Assistida (ou livre)", sets: "4", reps: "Falha", rest: "60s", note: "Composto rei. Deprime a escápula antes de puxar" },
+          { name: "Pulldown Frente (pegada aberta)", sets: "4", reps: "10–12", rest: "50s", note: "Cotovelos apontam pro chão — não pro lado" },
+          { name: "Remada Cavalinho", sets: "3", reps: "10–12", rest: "50s", note: "Peitoral no apoio, puxe até o quadril" },
+          { name: "Remada Baixa Fechada (polia)", sets: "3", reps: "12", rest: "40s", note: "Pausa de 1s no peito — não solte rápido" },
+          { name: "Pullover Polia Alta", sets: "2", reps: "15", rest: "35s", note: "Finaliza o latíssimo — arco amplo" },
+        ]},
+        { name: "BÍCEPS", icon: "💪", exercises: [
+          { name: "Rosca Direta Barra W", sets: "3", reps: "10", rest: "45s", note: "Sem balanço. Supinação no topo" },
+          { name: "Rosca Alternada Banco Inclinado", sets: "3", reps: "12", rest: "40s", note: "Inclinação máxima = alongamento máximo" },
+        ]},
+        { name: "ABDÔMEN", icon: "⚡", exercises: [
+          { name: "Infra Suspenso (ou em paralela)", sets: "3", reps: "15", rest: "25s", note: "Quadril retrovertido no topo" },
+          { name: "Crunch Máquina", sets: "3", reps: "15–20", rest: "20s", note: "Contração máxima — sem momentum" },
+        ]},
+      ],
+    },
+    {
+      id: "qua", label: "QUA", fullLabel: "QUARTA",
+      title: "PERNAS COMPLETO", tag: "Máquinas",
+      color: "#2EAF6B", duration: "~55 min",
+      sections: [
+        { name: "AQUECIMENTO", icon: "🔥", exercises: [
+          { name: "Bike Ergométrica", sets: "5 min", reps: "—", rest: "—", note: "Cadência leve — aqueça joelhos e quadril" },
+        ]},
+        { name: "QUADRÍCEPS", icon: "🦵", exercises: [
+          { name: "Leg Press 45°", sets: "4", reps: "12–15", rest: "60s", note: "Pés na largura dos ombros. Não trave o joelho" },
+          { name: "Hack Squat Máquina", sets: "4", reps: "10–12", rest: "60s", note: "Substituiu agachamento livre — mais seguro e eficaz" },
+          { name: "Cadeira Extensora", sets: "3", reps: "15 + Drop", rest: "45s", note: "Última série: drop set imediato sem pausa" },
+        ]},
+        { name: "POSTERIOR / ISQUIO", icon: "🦵", exercises: [
+          { name: "Mesa Flexora", sets: "4", reps: "12", rest: "50s", note: "Pausa 1s no topo — controle total na descida" },
+          { name: "Flexora Sentado (máquina)", sets: "3", reps: "12", rest: "40s", note: "Foco no alongamento — ângulo diferente" },
+        ]},
+        { name: "GLÚTEO", icon: "🎯", exercises: [
+          { name: "Coice em Máquina", sets: "3", reps: "15", rest: "35s", note: "Contração máxima no topo — não balance" },
+        ]},
+        { name: "PANTURRILHA", icon: "💥", exercises: [
+          { name: "Panturrilha no Leg Press", sets: "4", reps: "15–20", rest: "30s", note: "Amplitude máxima — calcanhar abaixo do pé" },
+        ]},
+        { name: "CARDIO FINAL", icon: "🏃", exercises: [
+          { name: "Bike Intensa (intervalada)", sets: "10 min", reps: "—", rest: "—", note: "30s forte / 30s leve — alternado" },
+        ]},
+      ],
+    },
+    {
+      id: "qui", label: "QUI", fullLabel: "QUINTA",
+      title: "OMBRO + PEITO COMPL.", tag: "Empurrar",
+      color: "#C44FD8", duration: "~55 min",
+      sections: [
+        { name: "AQUECIMENTO", icon: "🔥", exercises: [
+          { name: "Elástico + Face Pull leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito rotador antes de carregar" },
+        ]},
+        { name: "OMBRO", icon: "🔱", exercises: [
+          { name: "Desenvolvimento Halter (sentado)", sets: "4", reps: "10", rest: "60s", note: "Composto prioritário. Sem arquear lombar" },
+          { name: "Elevação Lateral Halter", sets: "4", reps: "12", rest: "40s", note: "Cotovelo levemente flexionado — foco no deltóide medial" },
+          { name: "Elevação Lateral Polia (unilateral)", sets: "3", reps: "12–15", rest: "35s", note: "Tensão constante — supera o halter na amplitude" },
+          { name: "Deltóide Posterior Máquina", sets: "3", reps: "15", rest: "35s", note: "Músculo negligenciado — não pule" },
+          { name: "Encolhimento Halter", sets: "3", reps: "12", rest: "40s", note: "Pico de 2s no topo — não gire o pescoço" },
+        ]},
+        { name: "PEITO COMPLEMENTAR", icon: "💪", exercises: [
+          { name: "Supino Reto Máquina", sets: "3", reps: "10–12", rest: "50s", note: "Reforço do peitoral médio sem sobrecarregar tríceps" },
+          { name: "Crossover Baixo (polia)", sets: "3", reps: "15", rest: "35s", note: "Finaliza peitoral inferior — arco controlado" },
+        ]},
+        { name: "ABDÔMEN", icon: "⚡", exercises: [
+          { name: "Prancha Isométrica", sets: "3", reps: "45s", rest: "20s", note: "Core total — não deixe o quadril cair" },
+          { name: "Abdominal Máquina (crunch)", sets: "3", reps: "15–20", rest: "20s", note: "Expiração no esforço — contração máxima" },
+        ]},
+      ],
+    },
+    {
+      id: "sex", label: "SEX", fullLabel: "SEXTA",
+      title: "COSTAS DENS. + BRAÇOS", tag: "Finalização",
+      color: "#E8A23A", duration: "~55 min",
+      sections: [
+        { name: "COSTAS (DENSIDADE)", icon: "🏋️", exercises: [
+          { name: "Remada Curvada Smith", sets: "4", reps: "10", rest: "55s", note: "Pegada pronada. Puxe até o umbigo — postura rígida" },
+          { name: "Remada Unilateral Máquina", sets: "3", reps: "12", rest: "45s", note: "Foco na contração escapular — não apenas braços" },
+          { name: "Pulldown Pegada Neutra", sets: "3", reps: "10–12", rest: "45s", note: "Ângulo diferente — maior ativação de rombóides" },
+        ]},
+        { name: "BÍCEPS", icon: "💪", exercises: [
+          { name: "Rosca Martelo com Corda", sets: "3", reps: "12", rest: "40s", note: "Foco no braquial — complementa rosca direta" },
+          { name: "Rosca Scott Máquina", sets: "3", reps: "10", rest: "40s", note: "Pico de contração máximo — cadência lenta" },
+        ]},
+        { name: "TRÍCEPS", icon: "⚡", exercises: [
+          { name: "Tríceps Testa Barra W", sets: "3", reps: "10", rest: "45s", note: "Controle total — não bata na testa" },
+          { name: "Tríceps Pulley (pegada supinada)", sets: "3", reps: "12", rest: "35s", note: "Variação de pegada ativa a cabeça longa" },
+        ]},
+        { name: "FINALIZAÇÃO METABÓLICA", icon: "🔥", exercises: [
+          { name: "Battle Rope", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Sistema anaeróbico — máxima potência" },
+          { name: "Burpee", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Full body — foco em velocidade" },
+          { name: "Bike Sprint", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Sprint máximo" },
+          { name: "Corrida Curta", sets: "2×", reps: "40s", rest: "60s entre rounds", note: "Encerra o circuito — vai até o limite" },
+        ]},
+      ],
+    },
+  ],
+  weekProgression: [
+    { week: "Semana 1", dias: "Dias 1–7", focus: "Adaptação de Intensidade", detail: "Aprenda os movimentos, calibre as cargas. Não vá à falha ainda. Foco em técnica e conexão mente-músculo.", cor: "#E8523A" },
+    { week: "Semana 2", dias: "Dias 8–14", focus: "Aumento de Carga", detail: "Aumente 5–10% nas cargas compostas. Última série próxima da falha. Reduz o descanso em 5s.", cor: "#3A7BE8" },
+    { week: "Semana 3", dias: "Dias 15–21", focus: "Alta Intensidade", detail: "Menos descanso. Bi-sets estratégicos nos isoladores. Falha real nos exercícios de isolamento.", cor: "#2EAF6B" },
+    { week: "Semana 4", dias: "Dias 22–30", focus: "Falha Controlada", detail: "Falha real nos compostos principais. Drop sets em todos os isoladores. Máxima densidade metabólica.", cor: "#C44FD8" },
+  ],
+  nutrition: [
+    { icon: "🥩", label: "Proteína", value: "2g / kg corporal", detail: "Distribuídas em 4–5 refeições ao longo do dia" },
+    { icon: "💧", label: "Hidratação", value: "3–4L / dia", detail: "Mais nos dias de treino — urina clara = hidratado" },
+    { icon: "📉", label: "Déficit calórico", value: "Moderado", detail: "250–500 kcal abaixo do TDEE — sem perder músculo" },
+    { icon: "😴", label: "Sono", value: "7–9h", detail: "Onde a hipertrofia real acontece — não negocie" },
+    { icon: "🚫", label: "Açúcar simples", value: "Mínimo", detail: "Priorize carbos complexos nas refeições peri-treino" },
+  ],
+};
+
+function App() {
+  const [activeDay, setActiveDay] = useState(0);
+  const [expandedSection, setExpandedSection] = useState(null);
+  const [activeTab, setActiveTab] = useState("treino");
+
+  const day = plan.days[activeDay];
+
+  const isSpecialSet = (s) => ["5 min","12 min","10 min","8 min","2×"].includes(s);
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0A0A0C", color: "#F0F0F0", fontFamily: "'Helvetica Neue', Arial, sans-serif", overflowX: "hidden" }}>
+
+      {/* HEADER */}
+      <div style={{ background: "#0D0D10", borderBottom: "1px solid #1A1A22", padding: "22px 20px 14px", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div style={{ fontSize: 9, letterSpacing: 4, color: "#444", fontWeight: 700, marginBottom: 4, textTransform: "uppercase" }}>ELITE TRAINING SYSTEM</div>
+            <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: -1, color: "#F0F0F0", lineHeight: 1 }}>PLANO ELITE 30 DIAS</div>
+            <div style={{ fontSize: 11, color: "#444", marginTop: 4, letterSpacing: 0.5 }}>Recomposição Corporal · 5×/semana</div>
+          </div>
+          <div style={{ background: "#E8523A", borderRadius: 6, padding: "6px 12px", fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "#fff" }}>30D</div>
+        </div>
+      </div>
+
+      {/* TABS */}
+      <div style={{ display: "flex", background: "#0A0A0C", borderBottom: "1px solid #1A1A22", padding: "0 20px" }}>
+        {["treino", "progressão", "nutrição"].map(tab => (
+          <button key={tab} onClick={() => setActiveTab(tab)} style={{
+            background: "none", border: "none",
+            color: activeTab === tab ? "#F0F0F0" : "#3A3A50",
+            fontSize: 11, fontWeight: 800, letterSpacing: 2,
+            padding: "13px 14px 11px", cursor: "pointer",
+            borderBottom: activeTab === tab ? "2px solid #E8523A" : "2px solid transparent",
+            textTransform: "uppercase", transition: "color 0.2s",
+          }}>{tab}</button>
+        ))}
+      </div>
+
+      {/* ===== TAB: TREINO ===== */}
+      {activeTab === "treino" && <>
+
+        {/* Day Pills */}
+        <div style={{ display: "flex", gap: 8, padding: "14px 20px", overflowX: "auto", background: "#0D0D10", borderBottom: "1px solid #1A1A22" }}>
+          {plan.days.map((d, i) => (
+            <button key={d.id} onClick={() => { setActiveDay(i); setExpandedSection(null); }} style={{
+              flex: "0 0 auto",
+              background: activeDay === i ? d.color : "#16161E",
+              border: activeDay === i ? "none" : "1px solid #22222E",
+              borderRadius: 10, padding: "10px 18px", transition: "all 0.15s",
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: activeDay === i ? "#fff" : "#444", textTransform: "uppercase" }}>{d.label}</div>
+            </button>
+          ))}
+          <button style={{ flex: "0 0 auto", background: "#16161E", border: "1px solid #1A1A22", borderRadius: 10, padding: "10px 18px", cursor: "default" }}>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: "#2A2A38", textTransform: "uppercase" }}>SAB</div>
+          </button>
+        </div>
+
+        {/* Day Header Card */}
+        <div style={{ margin: "16px 20px 12px", borderRadius: 14, background: `linear-gradient(135deg, ${day.color}20 0%, #12121A 100%)`, border: `1px solid ${day.color}30`, padding: "18px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <div style={{ fontSize: 9, color: day.color, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", marginBottom: 4 }}>{day.fullLabel} · {day.tag}</div>
+              <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: -0.5, color: "#F0F0F0" }}>{day.title}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 9, color: "#444", letterSpacing: 1, textTransform: "uppercase" }}>Duração</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: day.color }}>{day.duration}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sections */}
+        <div style={{ padding: "0 20px 80px" }}>
+          {day.sections.map((section, si) => (
+            <div key={si} style={{ marginBottom: 10 }}>
+              <button onClick={() => setExpandedSection(expandedSection === si ? null : si)} style={{
+                width: "100%", background: expandedSection === si ? "#1A1A24" : "#14141C",
+                border: "1px solid #1E1E2A",
+                borderRadius: expandedSection === si ? "10px 10px 0 0" : 10,
+                padding: "13px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.15s",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                  <span style={{ fontSize: 15 }}>{section.icon}</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#CCC", textTransform: "uppercase" }}>{section.name}</span>
+                  <span style={{ background: "#1E1E2A", borderRadius: 4, padding: "2px 7px", fontSize: 10, color: "#444", fontWeight: 600 }}>{section.exercises.length}</span>
+                </div>
+                <span style={{ color: "#333", fontSize: 12, display: "inline-block", transform: expandedSection === si ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</span>
+              </button>
+
+              {expandedSection === si && (
+                <div style={{ background: "#11111A", border: "1px solid #1E1E2A", borderTop: "none", borderRadius: "0 0 10px 10px", overflow: "hidden" }}>
+                  {section.exercises.map((ex, ei) => (
+                    <div key={ei} style={{ padding: "13px 16px", borderBottom: ei < section.exercises.length - 1 ? "1px solid #16161E" : "none" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 7 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#DDD", flex: 1, paddingRight: 8 }}>{ex.name}</div>
+                        <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+                          {!isSpecialSet(ex.sets) && ex.reps !== "—" && (
+                            <>
+                              <span style={{ background: `${day.color}22`, border: `1px solid ${day.color}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: day.color }}>{ex.sets}×</span>
+                              <span style={{ background: "#1E1E2A", borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: "#777" }}>{ex.reps}</span>
+                            </>
+                          )}
+                          {(isSpecialSet(ex.sets) || ex.reps === "—") && (
+                            <span style={{ background: `${day.color}22`, border: `1px solid ${day.color}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: day.color }}>
+                              {ex.reps !== "—" ? `${ex.sets} · ${ex.reps}` : ex.sets}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 7, alignItems: "flex-start" }}>
+                        {ex.rest !== "—" && ex.rest !== "Sem pausa" && (
+                          <span style={{ background: "#16161E", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#3A3A55", letterSpacing: 1, flexShrink: 0 }}>⏱ {ex.rest}</span>
+                        )}
+                        {ex.rest === "Sem pausa" && (
+                          <span style={{ background: "#E8523A18", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#E8523A", letterSpacing: 1, flexShrink: 0 }}>🔥 SEM PAUSA</span>
+                        )}
+                        <span style={{ fontSize: 11, color: "#4A4A60", lineHeight: 1.4 }}>{ex.note}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          {expandedSection === null && (
+            <div style={{ textAlign: "center", padding: "20px 0", color: "#2A2A38", fontSize: 11, letterSpacing: 1 }}>Toque em uma seção para ver os exercícios ↑</div>
+          )}
+        </div>
+      </>}
+
+      {/* ===== TAB: PROGRESSÃO ===== */}
+      {activeTab === "progressão" && (
+        <div style={{ padding: "20px 20px 80px" }}>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 9, letterSpacing: 3, color: "#444", fontWeight: 700, marginBottom: 5, textTransform: "uppercase" }}>PERIODIZAÇÃO SIMPLES</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "#F0F0F0", letterSpacing: -0.5 }}>Progressão 30 Dias</div>
+          </div>
+
+          {plan.weekProgression.map((w, i) => (
+            <div key={i} style={{ background: "#14141C", border: "1px solid #1E1E2A", borderLeft: `3px solid ${w.cor}`, borderRadius: 12, padding: "16px 18px", marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 2, color: w.cor, textTransform: "uppercase" }}>{w.week}</span>
+                <span style={{ background: "#1A1A22", borderRadius: 4, padding: "2px 8px", fontSize: 10, color: "#444" }}>{w.dias}</span>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#E0E0E0", marginBottom: 5 }}>{w.focus}</div>
+              <div style={{ fontSize: 12, color: "#4A4A60", lineHeight: 1.5 }}>{w.detail}</div>
+            </div>
+          ))}
+
+          <div style={{ background: "#14141C", border: "1px solid #E8523A30", borderRadius: 12, padding: "16px 18px", marginTop: 4 }}>
+            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: 2, color: "#E8523A", marginBottom: 12, textTransform: "uppercase" }}>⚡ Técnicas Avançadas (1× / semana)</div>
+            {[
+              ["Drop Set", "Última série: reduz 30% da carga sem pausa"],
+              ["Rest-Pause", "8 reps → 15s de pausa → mais 3–4 reps"],
+              ["Bi-Set", "2 exercícios seguidos sem descanso entre eles"],
+            ].map(([t, d], i) => (
+              <div key={i} style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
+                <span style={{ color: "#E8523A", fontSize: 11, marginTop: 1, flexShrink: 0 }}>▸</span>
+                <div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#BBB" }}>{t}</span>
+                  <span style={{ fontSize: 12, color: "#4A4A60" }}> — {d}</span>
+                </div>
+              </div>
+            ))}
+            <div style={{ fontSize: 11, color: "#2E2E42", marginTop: 8, borderTop: "1px solid #1A1A22", paddingTop: 8 }}>Não abuse — recuperação é prioridade</div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== TAB: NUTRIÇÃO ===== */}
+      {activeTab === "nutrição" && (
+        <div style={{ padding: "20px 20px 80px" }}>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 9, letterSpacing: 3, color: "#444", fontWeight: 700, marginBottom: 5, textTransform: "uppercase" }}>SUPORTE NUTRICIONAL</div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: "#F0F0F0", letterSpacing: -0.5 }}>Estratégia Alimentar</div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+            {plan.nutrition.map((n, i) => (
+              <div key={i} style={{ background: "#14141C", border: "1px solid #1E1E2A", borderRadius: 12, padding: "15px 14px", gridColumn: i === 4 ? "1 / -1" : undefined }}>
+                <div style={{ fontSize: 20, marginBottom: 7 }}>{n.icon}</div>
+                <div style={{ fontSize: 9, color: "#444", letterSpacing: 1.5, fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>{n.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#E0E0E0", marginBottom: 3 }}>{n.value}</div>
+                <div style={{ fontSize: 11, color: "#3A3A55", lineHeight: 1.4 }}>{n.detail}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ background: "linear-gradient(135deg, #E8523A18 0%, #14141C 100%)", border: "1px solid #E8523A30", borderRadius: 12, padding: "16px 18px" }}>
+            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: 2, color: "#E8523A", marginBottom: 10, textTransform: "uppercase" }}>🎯 Resultado Esperado — 30 Dias</div>
+            {[
+              "Redução perceptível de gordura corporal",
+              "Aumento de densidade e dureza muscular",
+              "Melhora visual do shape e proporções",
+              "Maior vascularização e definição",
+              "Ganho expressivo de condicionamento físico",
+              "Manutenção ou ganho de massa magra",
+            ].map((r, i) => (
+              <div key={i} style={{ display: "flex", gap: 9, marginBottom: 8, alignItems: "center" }}>
+                <span style={{ color: "#E8523A", fontSize: 10, flexShrink: 0 }}>✦</span>
+                <span style={{ fontSize: 12, color: "#5A5A75" }}>{r}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
