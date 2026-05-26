@@ -20,12 +20,45 @@
     ::-webkit-scrollbar-track { background: #0A0A0C; }
     ::-webkit-scrollbar-thumb { background: #2A2A38; border-radius: 2px; }
     button { cursor: pointer; }
+    
+    /* Estilos para os novos campos interativos sem quebrar o layout */
+    .exercise-input {
+      background: #16161E;
+      border: 1px solid #1E1E2A;
+      border-radius: 4px;
+      color: #DDD;
+      font-size: 10px;
+      padding: 2px 6px;
+      width: 50px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .exercise-input:focus {
+      border-color: #E8523A;
+    }
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 */
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      margin-top: 10px;
+      background: #000;
+    }
+    .video-container iframe, .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState } = React;
+const { useState, useEffect } = React;
 
 const plan = {
   days: [
@@ -35,21 +68,21 @@ const plan = {
       color: "#E8523A", duration: "~55 min",
       sections: [
         { name: "AQUECIMENTO", icon: "🔥", exercises: [
-          { name: "Esteira inclinada leve", sets: "5 min", reps: "—", rest: "—", note: "Eleve a FC antes de começar" },
+          { id: "seg-aq-1", name: "Esteira inclinada leve", sets: "5 min", reps: "—", rest: "—", note: "Eleve a FC antes de começar" },
         ]},
         { name: "PEITO", icon: "💪", exercises: [
-          { name: "Supino Inclinado Halter", sets: "4", reps: "8–10", rest: "60s", note: "Composto prioritário. Controle na descida (2s)" },
-          { name: "Supino Máquina Convergente", sets: "4", reps: "10–12", rest: "50s", note: "Esprema no topo — pico de contração" },
-          { name: "Crucifixo Máquina", sets: "3", reps: "12–15", rest: "40s", note: "Foco total na abertura e fechamento" },
-          { name: "Crossover Polia Alta", sets: "3", reps: "12–15", rest: "35s", note: "Última série: drop set obrigatório" },
+          { id: "seg-pe-1", name: "Supino Inclinado Halter", sets: "4", reps: "8–10", rest: "60s", note: "Composto prioritário. Controle na descida (2s)" },
+          { id: "seg-pe-2", name: "Supino Máquina Convergente", sets: "4", reps: "10–12", rest: "50s", note: "Esprema no topo — pico de contração" },
+          { id: "seg-pe-3", name: "Crucifixo Máquina", sets: "3", reps: "12–15", rest: "40s", note: "Foco total na abertura e fechamento" },
+          { id: "seg-pe-4", name: "Crossover Polia Alta", sets: "3", reps: "12–15", rest: "35s", note: "Última série: drop set obrigatório" },
         ]},
         { name: "TRÍCEPS", icon: "⚡", exercises: [
-          { name: "Tríceps Corda Polia", sets: "3", reps: "12–15", rest: "40s", note: "Abra as pontas no final — contração máxima" },
-          { name: "Tríceps Francês Unilateral", sets: "3", reps: "10–12", rest: "40s", note: "Controle total — sem balanço" },
-          { name: "Paralela Assistida", sets: "2", reps: "Falha", rest: "45s", note: "Vá até a falha real na última" },
+          { id: "seg-tr-1", name: "Tríceps Corda Polia", sets: "3", reps: "12–15", rest: "40s", note: "Abra as pontas no final — contração máxima" },
+          { id: "seg-tr-2", name: "Tríceps Francês Unilateral", sets: "3", reps: "10–12", rest: "40s", note: "Controle total — sem balanço" },
+          { id: "seg-tr-3", name: "Paralela Assistida", sets: "2", reps: "Falha", rest: "45s", note: "Vá até a falha real na última" },
         ]},
         { name: "CARDIO FINAL", icon: "🏃", exercises: [
-          { name: "Escada ou Esteira Inclinada", sets: "12 min", reps: "—", rest: "—", note: "Ritmo moderado-intenso. Inclinação 8–12%" },
+          { id: "seg-ca-1", name: "Escada ou Esteira Inclinada", sets: "12 min", reps: "—", rest: "—", note: "Ritmo moderado-intenso. Inclinação 8–12%" },
         ]},
       ],
     },
@@ -59,22 +92,22 @@ const plan = {
       color: "#3A7BE8", duration: "~55 min",
       sections: [
         { name: "AQUECIMENTO", icon: "🔥", exercises: [
-          { name: "Rotação de ombros + Pulldown leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito e prepare a escápula" },
+          { id: "ter-aq-1", name: "Rotação de ombros + Pulldown leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito e prepare a escápula" },
         ]},
         { name: "COSTAS", icon: "🏋️", exercises: [
-          { name: "Barra Fixa Assistida (ou livre)", sets: "4", reps: "Falha", rest: "60s", note: "Composto rei. Deprime a escápula antes de puxar" },
-          { name: "Pulldown Frente (pegada aberta)", sets: "4", reps: "10–12", rest: "50s", note: "Cotovelos apontam pro chão — não pro lado" },
-          { name: "Remada Cavalinho", sets: "3", reps: "10–12", rest: "50s", note: "Peitoral no apoio, puxe até o quadril" },
-          { name: "Remada Baixa Fechada (polia)", sets: "3", reps: "12", rest: "40s", note: "Pausa de 1s no peito — não solte rápido" },
-          { name: "Pullover Polia Alta", sets: "2", reps: "15", rest: "35s", note: "Finaliza o latíssimo — arco amplo" },
+          { id: "ter-co-1", name: "Barra Fixa Assistida (ou livre)", sets: "4", reps: "Falha", rest: "60s", note: "Composto rei. Deprime a escápula antes de puxar" },
+          { id: "ter-co-2", name: "Pulldown Frente (pegada aberta)", sets: "4", reps: "10–12", rest: "50s", note: "Cotovelos apontam pro chão — não pro lado" },
+          { id: "ter-co-3", name: "Remada Cavalinho", sets: "3", reps: "10–12", rest: "50s", note: "Peitoral no apoio, puxe até o quadril" },
+          { id: "ter-co-4", name: "Remada Baixa Fechada (polia)", sets: "3", reps: "12", rest: "40s", note: "Pausa de 1s no peito — não solte rápido" },
+          { id: "ter-co-5", name: "Pullover Polia Alta", sets: "2", reps: "15", rest: "35s", note: "Finaliza o latíssimo — arco amplo" },
         ]},
         { name: "BÍCEPS", icon: "💪", exercises: [
-          { name: "Rosca Direta Barra W", sets: "3", reps: "10", rest: "45s", note: "Sem balanço. Supinação no topo" },
-          { name: "Rosca Alternada Banco Inclinado", sets: "3", reps: "12", rest: "40s", note: "Inclinação máxima = alongamento máximo" },
+          { id: "ter-bi-1", name: "Rosca Direta Barra W", sets: "3", reps: "10", rest: "45s", note: "Sem balanço. Supinação no topo" },
+          { id: "ter-bi-2", name: "Rosca Alternada Banco Inclinado", sets: "3", reps: "12", rest: "40s", note: "Inclinação máxima = alongamento máximo" },
         ]},
         { name: "ABDÔMEN", icon: "⚡", exercises: [
-          { name: "Infra Suspenso (ou em paralela)", sets: "3", reps: "15", rest: "25s", note: "Quadril retrovertido no topo" },
-          { name: "Crunch Máquina", sets: "3", reps: "15–20", rest: "20s", note: "Contração máxima — sem momentum" },
+          { id: "ter-ab-1", name: "Infra Suspenso (ou em paralela)", sets: "3", reps: "15", rest: "25s", note: "Quadril retrovertido no topo" },
+          { id: "ter-ab-2", name: "Crunch Máquina", sets: "3", reps: "15–20", rest: "20s", note: "Contração máxima — sem momentum" },
         ]},
       ],
     },
@@ -84,25 +117,25 @@ const plan = {
       color: "#2EAF6B", duration: "~55 min",
       sections: [
         { name: "AQUECIMENTO", icon: "🔥", exercises: [
-          { name: "Bike Ergométrica", sets: "5 min", reps: "—", rest: "—", note: "Cadência leve — aqueça joelhos e quadril" },
+          { id: "qua-aq-1", name: "Bike Ergométrica", sets: "5 min", reps: "—", rest: "—", note: "Cadência leve — aqueça joelhos e quadril" },
         ]},
         { name: "QUADRÍCEPS", icon: "🦵", exercises: [
-          { name: "Leg Press 45°", sets: "4", reps: "12–15", rest: "60s", note: "Pés na largura dos ombros. Não trave o joelho" },
-          { name: "Hack Squat Máquina", sets: "4", reps: "10–12", rest: "60s", note: "Substituiu agachamento livre — mais seguro e eficaz" },
-          { name: "Cadeira Extensora", sets: "3", reps: "15 + Drop", rest: "45s", note: "Última série: drop set imediato sem pausa" },
+          { id: "qua-qu-1", name: "Leg Press 45°", sets: "4", reps: "12–15", rest: "60s", note: "Pés na largura dos ombros. Não trave o joelho" },
+          { id: "qua-qu-2", name: "Hack Squat Máquina", sets: "4", reps: "10–12", rest: "60s", note: "Substituiu agachamento livre — mais seguro e eficaz" },
+          { id: "qua-qu-3", name: "Cadeira Extensora", sets: "3", reps: "15 + Drop", rest: "45s", note: "Última série: drop set imediato sem pausa" },
         ]},
         { name: "POSTERIOR / ISQUIO", icon: "🦵", exercises: [
-          { name: "Mesa Flexora", sets: "4", reps: "12", rest: "50s", note: "Pausa 1s no topo — controle total na descida" },
-          { name: "Flexora Sentado (máquina)", sets: "3", reps: "12", rest: "40s", note: "Foco no alongamento — ângulo diferente" },
+          { id: "qua-po-1", name: "Mesa Flexora", sets: "4", reps: "12", rest: "50s", note: "Pausa 1s no topo — controle total na descida" },
+          { id: "qua-po-2", name: "Flexora Sentado (máquina)", sets: "3", reps: "12", rest: "40s", note: "Foco no alongamento — ângulo diferente" },
         ]},
         { name: "GLÚTEO", icon: "🎯", exercises: [
-          { name: "Coice em Máquina", sets: "3", reps: "15", rest: "35s", note: "Contração máxima no topo — não balance" },
+          { id: "qua-gl-1", name: "Coice em Máquina", sets: "3", reps: "15", rest: "35s", note: "Contração máxima no topo — não balance" },
         ]},
         { name: "PANTURRILHA", icon: "💥", exercises: [
-          { name: "Panturrilha no Leg Press", sets: "4", reps: "15–20", rest: "30s", note: "Amplitude máxima — calcanhar abaixo do pé" },
+          { id: "qua-pa-1", name: "Panturrilha no Leg Press", sets: "4", reps: "15–20", rest: "30s", note: "Amplitude máxima — calcanhar abaixo do pé" },
         ]},
         { name: "CARDIO FINAL", icon: "🏃", exercises: [
-          { name: "Bike Intensa (intervalada)", sets: "10 min", reps: "—", rest: "—", note: "30s forte / 30s leve — alternado" },
+          { id: "qua-ca-1", name: "Bike Intensa (intervalada)", sets: "10 min", reps: "—", rest: "—", note: "30s forte / 30s leve — alternado" },
         ]},
       ],
     },
@@ -112,22 +145,22 @@ const plan = {
       color: "#C44FD8", duration: "~55 min",
       sections: [
         { name: "AQUECIMENTO", icon: "🔥", exercises: [
-          { name: "Elástico + Face Pull leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito rotador antes de carregar" },
+          { id: "qui-aq-1", name: "Elástico + Face Pull leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito rotador antes de carregar" },
         ]},
         { name: "OMBRO", icon: "🔱", exercises: [
-          { name: "Desenvolvimento Halter (sentado)", sets: "4", reps: "10", rest: "60s", note: "Composto prioritário. Sem arquear lombar" },
-          { name: "Elevação Lateral Halter", sets: "4", reps: "12", rest: "40s", note: "Cotovelo levemente flexionado — foco no deltóide medial" },
-          { name: "Elevação Lateral Polia (unilateral)", sets: "3", reps: "12–15", rest: "35s", note: "Tensão constante — supera o halter na amplitude" },
-          { name: "Deltóide Posterior Máquina", sets: "3", reps: "15", rest: "35s", note: "Músculo negligenciado — não pule" },
-          { name: "Encolhimento Halter", sets: "3", reps: "12", rest: "40s", note: "Pico de 2s no topo — não gire o pescoço" },
+          { id: "qui-om-1", name: "Desenvolvimento Halter (sentado)", sets: "4", reps: "10", rest: "60s", note: "Composto prioritário. Sem arquear lombar" },
+          { id: "qui-om-2", name: "Elevação Lateral Halter", sets: "4", reps: "12", rest: "40s", note: "Cotovelo levemente flexionado — foco no deltóide medial" },
+          { id: "qui-om-3", name: "Elevação Lateral Polia (unilateral)", sets: "3", reps: "12–15", rest: "35s", note: "Tensão constante — supera o halter na amplitude" },
+          { id: "qui-om-4", name: "Deltóide Posterior Máquina", sets: "3", reps: "15", rest: "35s", note: "Músculo negligenciado — não pule" },
+          { id: "qui-om-5", name: "Encolhimento Halter", sets: "3", reps: "12", rest: "40s", note: "Pico de 2s no topo — não gire o pescoço" },
         ]},
         { name: "PEITO COMPLEMENTAR", icon: "💪", exercises: [
-          { name: "Supino Reto Máquina", sets: "3", reps: "10–12", rest: "50s", note: "Reforço do peitoral médio sem sobrecarregar tríceps" },
-          { name: "Crossover Baixo (polia)", sets: "3", reps: "15", rest: "35s", note: "Finaliza peitoral inferior — arco controlado" },
+          { id: "qui-pe-1", name: "Supino Reto Máquina", sets: "3", reps: "10–12", rest: "50s", note: "Reforço do peitoral médio sem sobrecarregar tríceps" },
+          { id: "qui-pe-2", name: "Crossover Baixo (polia)", sets: "3", reps: "15", rest: "35s", note: "Finaliza peitoral inferior — arco controlado" },
         ]},
         { name: "ABDÔMEN", icon: "⚡", exercises: [
-          { name: "Prancha Isométrica", sets: "3", reps: "45s", rest: "20s", note: "Core total — não deixe o quadril cair" },
-          { name: "Abdominal Máquina (crunch)", sets: "3", reps: "15–20", rest: "20s", note: "Expiração no esforço — contração máxima" },
+          { id: "qui-ab-1", name: "Prancha Isométrica", sets: "3", reps: "45s", rest: "20s", note: "Core total — não deixe o quadril cair" },
+          { id: "qui-ab-2", name: "Abdominal Máquina (crunch)", sets: "3", reps: "15–20", rest: "20s", note: "Expiração no esforço — contração máxima" },
         ]},
       ],
     },
@@ -137,23 +170,23 @@ const plan = {
       color: "#E8A23A", duration: "~55 min",
       sections: [
         { name: "COSTAS (DENSIDADE)", icon: "🏋️", exercises: [
-          { name: "Remada Curvada Smith", sets: "4", reps: "10", rest: "55s", note: "Pegada pronada. Puxe até o umbigo — postura rígida" },
-          { name: "Remada Unilateral Máquina", sets: "3", reps: "12", rest: "45s", note: "Foco na contração escapular — não apenas braços" },
-          { name: "Pulldown Pegada Neutra", sets: "3", reps: "10–12", rest: "45s", note: "Ângulo diferente — maior ativação de rombóides" },
+          { id: "sex-co-1", name: "Remada Curvada Smith", sets: "4", reps: "10", rest: "55s", note: "Pegada pronada. Puxe até o umbigo — postura rígida" },
+          { id: "sex-co-2", name: "Remada Unilateral Máquina", sets: "3", reps: "12", rest: "45s", note: "Foco na contração escapular — não apenas braços" },
+          { id: "sex-co-2", name: "Pulldown Pegada Neutra", sets: "3", reps: "10–12", rest: "45s", note: "Ângulo diferente — maior ativação de rombóides" },
         ]},
         { name: "BÍCEPS", icon: "💪", exercises: [
-          { name: "Rosca Martelo com Corda", sets: "3", reps: "12", rest: "40s", note: "Foco no braquial — complementa rosca direta" },
-          { name: "Rosca Scott Máquina", sets: "3", reps: "10", rest: "40s", note: "Pico de contração máximo — cadência lenta" },
+          { id: "sex-bi-1", name: "Rosca Martelo com Corda", sets: "3", reps: "12", rest: "40s", note: "Foco no braquial — complementa rosca direta" },
+          { id: "sex-bi-2", name: "Rosca Scott Máquina", sets: "3", reps: "10", rest: "40s", note: "Pico de contração máximo — cadência lenta" },
         ]},
         { name: "TRÍCEPS", icon: "⚡", exercises: [
-          { name: "Tríceps Testa Barra W", sets: "3", reps: "10", rest: "45s", note: "Controle total — não bata na testa" },
-          { name: "Tríceps Pulley (pegada supinada)", sets: "3", reps: "12", rest: "35s", note: "Variação de pegada ativa a cabeça longa" },
+          { id: "sex-tr-1", name: "Tríceps Testa Barra W", sets: "3", reps: "10", rest: "45s", note: "Controle total — não bata na testa" },
+          { id: "sex-tr-2", name: "Tríceps Pulley (pegada supinada)", sets: "3", reps: "12", rest: "35s", note: "Variação de pegada ativa a cabeça longa" },
         ]},
         { name: "FINALIZAÇÃO METABÓLICA", icon: "🔥", exercises: [
-          { name: "Battle Rope", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Sistema anaeróbico — máxima potência" },
-          { name: "Burpee", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Full body — foco em velocidade" },
-          { name: "Bike Sprint", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Sprint máximo" },
-          { name: "Corrida Curta", sets: "2×", reps: "40s", rest: "60s entre rounds", note: "Encerra o circuito — vai até o limite" },
+          { id: "sex-fi-1", name: "Battle Rope", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Sistema anaeróbico — máxima potência" },
+          { id: "sex-fi-2", name: "Burpee", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Full body — foco em velocidade" },
+          { id: "sex-fi-3", name: "Bike Sprint", sets: "2×", reps: "40s", rest: "Sem pausa", note: "Sprint máximo" },
+          { id: "sex-fi-4", name: "Corrida Curta", sets: "2×", reps: "40s", rest: "60s entre rounds", note: "Encerra o circuito — vai até o limite" },
         ]},
       ],
     },
@@ -172,6 +205,155 @@ const plan = {
     { icon: "🚫", label: "Açúcar simples", value: "Mínimo", detail: "Priorize carbos complexos nas refeições peri-treino" },
   ],
 };
+
+// Componente de Exercício Individual
+function ExerciseItem({ ex, dayColor, isSpecialSet }) {
+  const [completed, setCompleted] = useState(false);
+  const [weight, setWeight] = useState("");
+  const [repsDone, setRepsDone] = useState("");
+
+  // Carregar dados do localStorage ao montar
+  useEffect(() => {
+    const savedData = localStorage.getItem(`ex-${ex.id}`);
+    if (savedData) {
+      const { completed, weight, repsDone } = JSON.parse(savedData);
+      setCompleted(completed || false);
+      setWeight(weight || "");
+      setRepsDone(repsDone || "");
+    }
+  }, [ex.id]);
+
+  // Salvar dados no localStorage sempre que houver mudança
+  const saveData = (updates) => {
+    const currentData = { completed, weight, repsDone, ...updates };
+    localStorage.setItem(`ex-${ex.id}`, JSON.stringify(currentData));
+  };
+
+  const toggleCompleted = () => {
+    const newVal = !completed;
+    setCompleted(newVal);
+    saveData({ completed: newVal });
+  };
+
+  const handleWeightChange = (e) => {
+    const newVal = e.target.value;
+    setWeight(newVal);
+    saveData({ weight: newVal });
+  };
+
+  const handleRepsChange = (e) => {
+    const newVal = e.target.value;
+    setRepsDone(newVal);
+    saveData({ repsDone: newVal });
+  };
+
+  // Lógica para renderizar o vídeo se houver URL no objeto (exemplo: ex.videoUrl)
+  const renderVideo = () => {
+    if (!ex.videoUrl) return null;
+    
+    // Suporte para YouTube embed
+    if (ex.videoUrl.includes("youtube.com") || ex.videoUrl.includes("youtu.be")) {
+      const videoId = ex.videoUrl.split('v=')[1] || ex.videoUrl.split('/').pop();
+      return (
+        <div className="video-container">
+          <iframe src={`https://www.youtube.com/embed/${videoId}`} allowFullScreen title={ex.name}></iframe>
+        </div>
+      );
+    }
+    
+    // Suporte para vídeo direto (upload)
+    return (
+      <div className="video-container">
+        <video controls src={ex.videoUrl}></video>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ 
+      padding: "13px 16px", 
+      borderBottom: "1px solid #16161E",
+      opacity: completed ? 0.6 : 1,
+      transition: "opacity 0.3s ease",
+      background: completed ? "rgba(255,255,255,0.02)" : "transparent"
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 7 }}>
+        <div style={{ display: "flex", gap: 10, flex: 1, alignItems: "flex-start" }}>
+          {/* Checkbox customizado */}
+          <div 
+            onClick={toggleCompleted}
+            style={{ 
+              width: 18, 
+              height: 18, 
+              border: `1px solid ${completed ? dayColor : "#333"}`, 
+              borderRadius: 4, 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              cursor: "pointer",
+              background: completed ? dayColor : "transparent",
+              marginTop: 1,
+              flexShrink: 0
+            }}
+          >
+            {completed && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: completed ? "#666" : "#DDD", paddingRight: 8 }}>{ex.name}</div>
+        </div>
+        <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+          {!isSpecialSet(ex.sets) && ex.reps !== "—" && (
+            <>
+              <span style={{ background: `${dayColor}22`, border: `1px solid ${dayColor}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: dayColor }}>{ex.sets}×</span>
+              <span style={{ background: "#1E1E2A", borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: "#777" }}>{ex.reps}</span>
+            </>
+          )}
+          {(isSpecialSet(ex.sets) || ex.reps === "—") && (
+            <span style={{ background: `${dayColor}22`, border: `1px solid ${dayColor}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: dayColor }}>
+              {ex.reps !== "—" ? `${ex.sets} · ${ex.reps}` : ex.sets}
+            </span>
+          )}
+        </div>
+      </div>
+      
+      <div style={{ display: "flex", gap: 7, alignItems: "flex-start", flexWrap: "wrap" }}>
+        {ex.rest !== "—" && ex.rest !== "Sem pausa" && (
+          <span style={{ background: "#16161E", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#3A3A55", letterSpacing: 1, flexShrink: 0 }}>⏱ {ex.rest}</span>
+        )}
+        {ex.rest === "Sem pausa" && (
+          <span style={{ background: "#E8523A18", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#E8523A", letterSpacing: 1, flexShrink: 0 }}>🔥 SEM PAUSA</span>
+        )}
+        <span style={{ fontSize: 11, color: "#4A4A60", lineHeight: 1.4, flex: "1 1 100%", marginBottom: 8 }}>{ex.note}</span>
+        
+        {/* Campos Interativos: Peso e Repetições */}
+        <div style={{ display: "flex", gap: 10, width: "100%", marginTop: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 9, color: "#444", fontWeight: 700, textTransform: "uppercase" }}>Peso:</span>
+            <input 
+              type="text" 
+              className="exercise-input" 
+              placeholder="kg" 
+              value={weight}
+              onChange={handleWeightChange}
+            />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 9, color: "#444", fontWeight: 700, textTransform: "uppercase" }}>Reps:</span>
+            <input 
+              type="number" 
+              className="exercise-input" 
+              placeholder="0" 
+              value={repsDone}
+              onChange={handleRepsChange}
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Área de Vídeo */}
+      {renderVideo()}
+    </div>
+  );
+}
 
 function App() {
   const [activeDay, setActiveDay] = useState(0);
@@ -266,33 +448,12 @@ function App() {
               {expandedSection === si && (
                 <div style={{ background: "#11111A", border: "1px solid #1E1E2A", borderTop: "none", borderRadius: "0 0 10px 10px", overflow: "hidden" }}>
                   {section.exercises.map((ex, ei) => (
-                    <div key={ei} style={{ padding: "13px 16px", borderBottom: ei < section.exercises.length - 1 ? "1px solid #16161E" : "none" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 7 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#DDD", flex: 1, paddingRight: 8 }}>{ex.name}</div>
-                        <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
-                          {!isSpecialSet(ex.sets) && ex.reps !== "—" && (
-                            <>
-                              <span style={{ background: `${day.color}22`, border: `1px solid ${day.color}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: day.color }}>{ex.sets}×</span>
-                              <span style={{ background: "#1E1E2A", borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: "#777" }}>{ex.reps}</span>
-                            </>
-                          )}
-                          {(isSpecialSet(ex.sets) || ex.reps === "—") && (
-                            <span style={{ background: `${day.color}22`, border: `1px solid ${day.color}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: day.color }}>
-                              {ex.reps !== "—" ? `${ex.sets} · ${ex.reps}` : ex.sets}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", gap: 7, alignItems: "flex-start" }}>
-                        {ex.rest !== "—" && ex.rest !== "Sem pausa" && (
-                          <span style={{ background: "#16161E", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#3A3A55", letterSpacing: 1, flexShrink: 0 }}>⏱ {ex.rest}</span>
-                        )}
-                        {ex.rest === "Sem pausa" && (
-                          <span style={{ background: "#E8523A18", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#E8523A", letterSpacing: 1, flexShrink: 0 }}>🔥 SEM PAUSA</span>
-                        )}
-                        <span style={{ fontSize: 11, color: "#4A4A60", lineHeight: 1.4 }}>{ex.note}</span>
-                      </div>
-                    </div>
+                    <ExerciseItem 
+                      key={ex.id || ei} 
+                      ex={ex} 
+                      dayColor={day.color} 
+                      isSpecialSet={isSpecialSet} 
+                    />
                   ))}
                 </div>
               )}
