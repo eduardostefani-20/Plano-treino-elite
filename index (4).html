@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FitPlanner - Elite Training System para planejamento de treinos, dieta e progresso." />
+  <meta name="theme-color" content="#0A0A0C" />
+  <title>FitPlanner — Elite Training System</title>
+  
+  <!-- Preconnect para otimizar carregamento de fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400&display=swap" rel="stylesheet" />
+  
+  <!-- React com versão específica e integridade -->
+  <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" integrity="sha384-7Xyp9xBL3pJYgJhwVBhWXXQqBBXKXJfKx1MFBuVGGJZyxGJ6nZbxEVhLGEGCZg9"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" integrity="sha384-6j/zcG7hJXvvVVJQpXbJJnCCBFMIqKqJXnHLMpWXQzwpBpWLbXPQbqXPLMvfZLYKU"></script>
+  
+  <!-- Babel Standalone para JSX (otimizado) -->
+  <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+  
+  <style>
+    /* ===== RESET & BASE — ORIGINAL SEM MODIFICAÇÕES ===== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html, body, #root {
+      height: 100%;
+    }
+    
+    body {
+      background: #0A0A0C;
+      color: #F0F0F0;
+      font-family: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
+    }
+    
+    /* Scrollbar customizado */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0A0A0C;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2A2A38;
+      border-radius: 2px;
+    }
+    
+    /* Elementos interativos */
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+    
+    input, textarea {
+      outline: none;
+      font-family: inherit;
+    }
+    
+    /* ===== LAYOUT PRINCIPAL ===== */
+    #root {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: #0D0D10;
+      border-right: 1px solid #1A1A22;
+      display: flex;
+      flex-direction: column;
+      z-index: 200;
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid #1A1A22;
+    }
+    
+    .sidebar-logo-tag {
+      font-size: 8px;
+      letter-spacing: 4px;
+      color: #333;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    
+    .sidebar-logo-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 2px;
+      color: #F0F0F0;
+      line-height: 1;
+    }
+    
+    .sidebar-logo-name span {
+      color: #E8523A;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 10px;
+      overflow-y: auto;
+    }
+    
+    .nav-section-label {
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: #2A2A38;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0 10px;
+      margin: 12px 0 6px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #3A3A55;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+      width: 100%;
+      margin-bottom: 2px;
+    }
+    
+    .nav-item:hover {
+      background: #14141C;
+      color: #888;
+    }
+    
+    .nav-item.active {
+      background: #16161E;
+      color: #F0F0F0;
+    }
+    
+    .nav-item.active .nav-dot {
+      background: #E8523A;
+    }
+    
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #2A2A38;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+      margin-left: auto;
+    }
+    
+    .nav-icon {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    
+    .sidebar-footer {
+      border-top: 1px solid #1A1A22;
+      padding: 14px 16px;
+    }
+    
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #E8523A, #C44FD8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    
+    .user-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #888;
+    }
+    
+    .user-plan {
+      font-size: 9px;
+      color: #333;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    .main-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #0A0A0C;
+    }
+    
+    /* ===== MOBILE NAVIGATION ===== */
+    .mobile-topbar {
+      display: none;
+      background: #0D0D10;
+      border-bottom: 1px solid #1A1A22;
+      padding: 14px 20px;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 300;
+    }
+    
+    .mobile-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: #F0F0F0;
+    }
+    
+    .mobile-logo span {
+      color: #E8523A;
+    }
+    
+    .mobile-bottomnav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0D0D10;
+      border-top: 1px solid #1A1A22;
+      padding: 8px 0 12px;
+      z-index: 300;
+      justify-content: space-around;
+    }
+    
+    .mobile-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 12px;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #333;
+      transition: color 0.15s ease;
+    }
+    
+    .mobile-nav-btn.active {
+      color: #E8523A;
+    }
+    
+    .mobile-nav-icon {
+      font-size: 18px;
+    }
+    
+    /* ===== PAGE SECTIONS ===== */
+    .page {
+      min-height: 100vh;
+    }
+    
+    .dash-header {
+      background: #0D0D10;
+      border-bottom: 1px solid #1A1A22;
+      padding: 28px 28px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .dash-header-tag {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: #333;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    
+    .dash-header-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 2px;
+      color: #F0F0F0;
+      line-height: 1;
+    }
+    
+    .dash-header-sub {
+      font-size: 12px;
+      color: #444;
+      margin-top: 5px;
+    }
+    
+    .dash-body {
+      padding: 24px 28px 80px;
+    }
+    
+    /* ===== GRID E CARDS ===== */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .metric-card {
+      background: #14141C;
+      border: 1px solid #1E1E2A;
+      border-radius: 14px;
+      padding: 18px 16px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .metric-card:hover {
+      border-color: #2A2A38;
+    }
+    
+    .metric-icon {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    
+    .metric-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #444;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    
+    .metric-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: #F0F0F0;
+      letter-spacing: -1px;
+    }
+    
+    .metric-sub {
+      font-size: 10px;
+      color: #3A3A55;
+      margin-top: 3px;
+    }
+    
+    .metric-bar {
+      height: 3px;
+      background: #1A1A22;
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.8s ease;
+    }
+    
+    .dash-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .dash-card {
+      background: #14141C;
+      border: 1px solid #1E1E2A;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    
+    .dash-card-title {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: #444;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    
+    .dash-card-big {
+      font-size: 28px;
+      font-weight: 900;
+      color: #F0F0F0;
+      letter-spacing: -1px;
+    }
+    
+    /* ===== SEMANA ===== */
+    .week-strip {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .week-day {
+      flex: 1;
+      background: #14141C;
+      border: 1px solid #1E1E2A;
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+    }
+    
+    .week-day.done {
+      border-color: #2EAF6B44;
+      background: #2EAF6B11;
+    }
+    
+    .week-day.today {
+      border-color: #E8523A;
+    }
+    
+    .week-day-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #444;
+      text-transform: uppercase;
+    }
+    
+    .week-day.today .week-day-label {
+      color: #E8523A;
+    }
+    
+    .week-day-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1E1E2A;
+      margin: 6px auto 0;
+    }
+    
+    .week-day.done .week-day-dot {
+      background: #2EAF6B;
+    }
+    
+    .week-day.today .week-day-dot {
+      background: #E8523A;
+    }
+    
+    /* ===== ÁGUA ===== */
+    .water-cups {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    
+    .water-cup {
+      width: 32px;
+      height: 38px;
+      background: #16161E;
+      border: 1px solid #1E1E2A;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .water-cup.filled {
+      background: #1A3A55;
+      border-color: #3A7BE8;
+    }
+    
+    /* ===== EXERCÍCIO — classes originais preservadas ===== */
+    /* Usadas pelos inputs de peso e repetições */
+    .exercise-input {
+      background: #16161E;
+      border: 1px solid #1E1E2A;
+      border-radius: 4px;
+      color: #DDD;
+      font-size: 10px;
+      padding: 2px 6px;
+      width: 50px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .exercise-input:focus {
+      border-color: #E8523A;
+    }
+    
+    /* Container responsivo para vídeos (YouTube, mp4, iframe) */
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%; /* Proporção 16:9 */
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      margin-top: 10px;
+      background: #000;
+    }
+    
+    .video-container iframe,
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    /* ===== BADGE ===== */
+    .elite-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #E8523A;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+    
+    /* ===== RESPONSIVIDADE ===== */
+    @media (max-width: 1100px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        overflow: auto;
+      }
+      
+      #root {
+        flex-direction: column;
+        overflow: visible;
+        height: auto;
+        min-height: 100vh;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .mobile-topbar {
+        display: flex;
+      }
+      
+      .mobile-bottomnav {
+        display: flex;
+      }
+      
+      .main-area {
+        overflow: visible;
+        padding-bottom: 70px;
+      }
+      
+      .dash-header {
+        padding: 20px 16px 16px;
+        position: relative;
+      }
+      
+      .dash-body {
+        padding: 16px 16px 20px;
+      }
+      
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      
+      .dash-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .dash-header-title {
+        font-size: 28px;
+      }
+      
+      .week-strip {
+        gap: 5px;
+      }
+    }
+
+    /* =================================================================
+       NOVOS ESTILOS — Adicionados para funcionalidades interativas
+       Nenhum estilo acima foi modificado.
+       ================================================================= */
+
+    /* Scroll horizontal nos day pills sem scrollbar visível */
+    .day-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 14px 20px;
+      background: #0D0D10;
+      border-bottom: 1px solid #1A1A22;
+      scrollbar-width: none; /* Firefox */
+    }
+    .day-pills::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+    /* Botão de seção accordion */
+    .section-toggle {
+      width: 100%;
+      background: #14141C;
+      border: 1px solid #1E1E2A;
+      padding: 13px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s ease;
+      text-align: left;
+      border-radius: 10px;
+    }
+    .section-toggle.open {
+      background: #1A1A24;
+      border-radius: 10px 10px 0 0;
+    }
+
+    /* Checkbox interativo do exercício */
+    .ex-checkbox {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all 0.15s ease;
+      padding: 0;
+      font-size: 9px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+    }
+
+    /* Linha dos campos interativos (peso + reps) */
+    .ex-fields-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding-left: 24px;
+      margin-top: 9px;
+    }
+    .ex-field-label {
+      font-size: 9px;
+      color: #2E2E48;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .ex-field-unit {
+      font-size: 9px;
+      color: #2A2A42;
+      font-weight: 600;
+    }
+    /* Divisor visual entre os campos */
+    .ex-field-divider {
+      width: 1px;
+      height: 14px;
+      background: #1E1E2A;
+      flex-shrink: 0;
+    }
+
+    /* Responsividade dos fields em telas pequenas */
+    @media (max-width: 360px) {
+      .ex-fields-row { gap: 6px; }
+      .exercise-input { width: 42px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    
+    /* ============================================================
+       DADOS DE NAVEGAÇÃO — original sem modificação
+       ============================================================ */
+    const NAV = [
+      { id: "dashboard", label: "Dashboard", icon: "📊", mIcon: "📊" },
+      { id: "treino",    label: "Treino",    icon: "💪", mIcon: "💪" },
+      { id: "dieta",     label: "Dieta",     icon: "🍽️", mIcon: "🍽️" },
+      { id: "progresso", label: "Progresso", icon: "📈", mIcon: "📈" },
+      { id: "perfil",    label: "Perfil",    icon: "👤", mIcon: "👤" },
+    ];
+
+    /* ============================================================
+       PLAN_DATA — Dados completos dos 5 dias de treino.
+       Restaurados com todos os exercícios originais.
+       Cada exercício tem um `id` único para persistência no localStorage.
+       Para adicionar vídeo a um exercício, inclua: video: "URL_AQUI"
+       Aceita: URL YouTube, URL direta de vídeo (mp4), ou string <iframe>.
+       ============================================================ */
+    const PLAN_DATA = {
+      days: [
+        {
+          id: "seg", label: "SEG", fullLabel: "SEGUNDA",
+          title: "PEITO + TRÍCEPS", tag: "Empurrar",
+          color: "#E8523A", duration: "~55 min",
+          sections: [
+            { name: "AQUECIMENTO", icon: "🔥", exercises: [
+              { id: "seg-aq-1", name: "Esteira inclinada leve", sets: "5 min", reps: "—", rest: "—", note: "Eleve a FC antes de começar" },
+            ]},
+            { name: "PEITO", icon: "💪", exercises: [
+              { id: "seg-pe-1", name: "Supino Inclinado Halter",      sets: "4", reps: "8–10",  rest: "60s", note: "Composto prioritário. Controle na descida (2s)" },
+              { id: "seg-pe-2", name: "Supino Máquina Convergente",   sets: "4", reps: "10–12", rest: "50s", note: "Esprema no topo — pico de contração" },
+              { id: "seg-pe-3", name: "Crucifixo Máquina",            sets: "3", reps: "12–15", rest: "40s", note: "Foco total na abertura e fechamento" },
+              { id: "seg-pe-4", name: "Crossover Polia Alta",         sets: "3", reps: "12–15", rest: "35s", note: "Última série: drop set obrigatório" },
+            ]},
+            { name: "TRÍCEPS", icon: "⚡", exercises: [
+              { id: "seg-tri-1", name: "Tríceps Corda Polia",          sets: "3", reps: "12–15", rest: "40s", note: "Abra as pontas no final — contração máxima" },
+              { id: "seg-tri-2", name: "Tríceps Francês Unilateral",   sets: "3", reps: "10–12", rest: "40s", note: "Controle total — sem balanço" },
+              { id: "seg-tri-3", name: "Paralela Assistida",           sets: "2", reps: "Falha", rest: "45s", note: "Vá até a falha real na última" },
+            ]},
+            { name: "CARDIO FINAL", icon: "🏃", exercises: [
+              { id: "seg-cd-1", name: "Escada ou Esteira Inclinada", sets: "12 min", reps: "—", rest: "—", note: "Ritmo moderado-intenso. Inclinação 8–12%" },
+            ]},
+          ],
+        },
+        {
+          id: "ter", label: "TER", fullLabel: "TERÇA",
+          title: "COSTAS + BÍCEPS + ABD", tag: "Puxar",
+          color: "#3A7BE8", duration: "~55 min",
+          sections: [
+            { name: "AQUECIMENTO", icon: "🔥", exercises: [
+              { id: "ter-aq-1", name: "Rotação de ombros + Pulldown leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito e prepare a escápula" },
+            ]},
+            { name: "COSTAS", icon: "🏋️", exercises: [
+              { id: "ter-cos-1", name: "Barra Fixa Assistida (ou livre)",    sets: "4", reps: "Falha", rest: "60s", note: "Composto rei. Deprime a escápula antes de puxar" },
+              { id: "ter-cos-2", name: "Pulldown Frente (pegada aberta)",    sets: "4", reps: "10–12", rest: "50s", note: "Cotovelos apontam pro chão — não pro lado" },
+              { id: "ter-cos-3", name: "Remada Cavalinho",                   sets: "3", reps: "10–12", rest: "50s", note: "Peitoral no apoio, puxe até o quadril" },
+              { id: "ter-cos-4", name: "Remada Baixa Fechada (polia)",       sets: "3", reps: "12",    rest: "40s", note: "Pausa de 1s no peito — não solte rápido" },
+              { id: "ter-cos-5", name: "Pullover Polia Alta",                sets: "2", reps: "15",    rest: "35s", note: "Finaliza o latíssimo — arco amplo" },
+            ]},
+            { name: "BÍCEPS", icon: "💪", exercises: [
+              { id: "ter-bic-1", name: "Rosca Direta Barra W",               sets: "3", reps: "10", rest: "45s", note: "Sem balanço. Supinação no topo" },
+              { id: "ter-bic-2", name: "Rosca Alternada Banco Inclinado",    sets: "3", reps: "12", rest: "40s", note: "Inclinação máxima = alongamento máximo" },
+            ]},
+            { name: "ABDÔMEN", icon: "⚡", exercises: [
+              { id: "ter-abd-1", name: "Infra Suspenso (ou em paralela)",    sets: "3", reps: "15",    rest: "25s", note: "Quadril retrovertido no topo" },
+              { id: "ter-abd-2", name: "Crunch Máquina",                     sets: "3", reps: "15–20", rest: "20s", note: "Contração máxima — sem momentum" },
+            ]},
+          ],
+        },
+        {
+          id: "qua", label: "QUA", fullLabel: "QUARTA",
+          title: "PERNAS COMPLETO", tag: "Máquinas",
+          color: "#2EAF6B", duration: "~55 min",
+          sections: [
+            { name: "AQUECIMENTO", icon: "🔥", exercises: [
+              { id: "qua-aq-1", name: "Bike Ergométrica", sets: "5 min", reps: "—", rest: "—", note: "Cadência leve — aqueça joelhos e quadril" },
+            ]},
+            { name: "QUADRÍCEPS", icon: "🦵", exercises: [
+              { id: "qua-quad-1", name: "Leg Press 45°",          sets: "4", reps: "12–15",    rest: "60s", note: "Pés na largura dos ombros. Não trave o joelho" },
+              { id: "qua-quad-2", name: "Hack Squat Máquina",     sets: "4", reps: "10–12",    rest: "60s", note: "Substituiu agachamento livre — mais seguro e eficaz" },
+              { id: "qua-quad-3", name: "Cadeira Extensora",      sets: "3", reps: "15 + Drop", rest: "45s", note: "Última série: drop set imediato sem pausa" },
+            ]},
+            { name: "POSTERIOR / ISQUIO", icon: "🦵", exercises: [
+              { id: "qua-pos-1", name: "Mesa Flexora",               sets: "4", reps: "12", rest: "50s", note: "Pausa 1s no topo — controle total na descida" },
+              { id: "qua-pos-2", name: "Flexora Sentado (máquina)",  sets: "3", reps: "12", rest: "40s", note: "Foco no alongamento — ângulo diferente" },
+            ]},
+            { name: "GLÚTEO", icon: "🎯", exercises: [
+              { id: "qua-glu-1", name: "Coice em Máquina", sets: "3", reps: "15", rest: "35s", note: "Contração máxima no topo — não balance" },
+            ]},
+            { name: "PANTURRILHA", icon: "💥", exercises: [
+              { id: "qua-pan-1", name: "Panturrilha no Leg Press", sets: "4", reps: "15–20", rest: "30s", note: "Amplitude máxima — calcanhar abaixo do pé" },
+            ]},
+            { name: "CARDIO FINAL", icon: "🏃", exercises: [
+              { id: "qua-cd-1", name: "Bike Intensa (intervalada)", sets: "10 min", reps: "—", rest: "—", note: "30s forte / 30s leve — alternado" },
+            ]},
+          ],
+        },
+        {
+          id: "qui", label: "QUI", fullLabel: "QUINTA",
+          title: "OMBRO + PEITO COMPL.", tag: "Empurrar",
+          color: "#C44FD8", duration: "~55 min",
+          sections: [
+            { name: "AQUECIMENTO", icon: "🔥", exercises: [
+              { id: "qui-aq-1", name: "Elástico + Face Pull leve", sets: "5 min", reps: "—", rest: "—", note: "Ative o manguito rotador antes de carregar" },
+            ]},
+            { name: "OMBRO", icon: "🔱", exercises: [
+              { id: "qui-omh-1", name: "Desenvolvimento Halter (sentado)",       sets: "4", reps: "10",    rest: "60s", note: "Composto prioritário. Sem arquear lombar" },
+              { id: "qui-omh-2", name: "Elevação Lateral Halter",                sets: "4", reps: "12",    rest: "40s", note: "Cotovelo levemente flexionado — foco no deltóide medial" },
+              { id: "qui-omh-3", name: "Elevação Lateral Polia (unilateral)",    sets: "3", reps: "12–15", rest: "35s", note: "Tensão constante — supera o halter na amplitude" },
+              { id: "qui-omh-4", name: "Deltóide Posterior Máquina",             sets: "3", reps: "15",    rest: "35s", note: "Músculo negligenciado — não pule" },
+              { id: "qui-omh-5", name: "Encolhimento Halter",                    sets: "3", reps: "12",    rest: "40s", note: "Pico de 2s no topo — não gire o pescoço" },
+            ]},
+            { name: "PEITO COMPLEMENTAR", icon: "💪", exercises: [
+              { id: "qui-pei-1", name: "Supino Reto Máquina",      sets: "3", reps: "10–12", rest: "50s", note: "Reforço do peitoral médio sem sobrecarregar tríceps" },
+              { id: "qui-pei-2", name: "Crossover Baixo (polia)",  sets: "3", reps: "15",    rest: "35s", note: "Finaliza peitoral inferior — arco controlado" },
+            ]},
+            { name: "ABDÔMEN", icon: "⚡", exercises: [
+              { id: "qui-abd-1", name: "Prancha Isométrica",            sets: "3", reps: "45s",    rest: "20s", note: "Core total — não deixe o quadril cair" },
+              { id: "qui-abd-2", name: "Abdominal Máquina (crunch)",    sets: "3", reps: "15–20",  rest: "20s", note: "Expiração no esforço — contração máxima" },
+            ]},
+          ],
+        },
+        {
+          id: "sex", label: "SEX", fullLabel: "SEXTA",
+          title: "COSTAS DENS. + BRAÇOS", tag: "Finalização",
+          color: "#E8A23A", duration: "~55 min",
+          sections: [
+            { name: "COSTAS (DENSIDADE)", icon: "🏋️", exercises: [
+              { id: "sex-cos-1", name: "Remada Curvada Smith",         sets: "4", reps: "10",    rest: "55s", note: "Pegada pronada. Puxe até o umbigo — postura rígida" },
+              { id: "sex-cos-2", name: "Remada Unilateral Máquina",    sets: "3", reps: "12",    rest: "45s", note: "Foco na contração escapular — não apenas braços" },
+              { id: "sex-cos-3", name: "Pulldown Pegada Neutra",       sets: "3", reps: "10–12", rest: "45s", note: "Ângulo diferente — maior ativação de rombóides" },
+            ]},
+            { name: "BÍCEPS", icon: "💪", exercises: [
+              { id: "sex-bic-1", name: "Rosca Martelo com Corda",  sets: "3", reps: "12", rest: "40s", note: "Foco no braquial — complementa rosca direta" },
+              { id: "sex-bic-2", name: "Rosca Scott Máquina",      sets: "3", reps: "10", rest: "40s", note: "Pico de contração máximo — cadência lenta" },
+            ]},
+            { name: "TRÍCEPS", icon: "⚡", exercises: [
+              { id: "sex-tri-1", name: "Tríceps Testa Barra W",            sets: "3", reps: "10", rest: "45s", note: "Controle total — não bata na testa" },
+              { id: "sex-tri-2", name: "Tríceps Pulley (pegada supinada)", sets: "3", reps: "12", rest: "35s", note: "Variação de pegada ativa a cabeça longa" },
+            ]},
+            { name: "FINALIZAÇÃO METABÓLICA", icon: "🔥", exercises: [
+              { id: "sex-fin-1", name: "Battle Rope",    sets: "2×", reps: "40s", rest: "Sem pausa",       note: "Sistema anaeróbico — máxima potência" },
+              { id: "sex-fin-2", name: "Burpee",         sets: "2×", reps: "40s", rest: "Sem pausa",       note: "Full body — foco em velocidade" },
+              { id: "sex-fin-3", name: "Bike Sprint",    sets: "2×", reps: "40s", rest: "Sem pausa",       note: "Sprint máximo" },
+              { id: "sex-fin-4", name: "Corrida Curta",  sets: "2×", reps: "40s", rest: "60s entre rounds", note: "Encerra o circuito — vai até o limite" },
+            ]},
+          ],
+        },
+      ],
+    };
+
+    /* ============================================================
+       HELPERS DE PERSISTÊNCIA — localStorage
+       Chave: "fp_ex_{exerciseId}" — isolada por exercício.
+       Estrutura salva: { done: bool, peso: string, reps: string }
+       ============================================================ */
+
+    /** Carrega dados salvos de um exercício, ou retorna estado padrão. */
+    function loadExData(id) {
+      try {
+        const raw = localStorage.getItem(`fp_ex_${id}`);
+        return raw ? JSON.parse(raw) : { done: false, peso: "", reps: "" };
+      } catch {
+        // Falha silenciosa — localStorage pode estar desabilitado
+        return { done: false, peso: "", reps: "" };
+      }
+    }
+
+    /** Salva dados de um exercício no localStorage imediatamente. */
+    function saveExData(id, data) {
+      try {
+        localStorage.setItem(`fp_ex_${id}`, JSON.stringify(data));
+      } catch (e) {
+        console.warn("FitPlanner: erro ao salvar no localStorage:", e);
+      }
+    }
+
+    /* ============================================================
+       COMPONENTE: VideoSlot
+       Exibe vídeo do exercício de forma responsiva.
+       Fica completamente oculto quando `video` é vazio/undefined.
+       
+       Como usar no PLAN_DATA:
+         video: "https://www.youtube.com/watch?v=ID"   → YouTube embed
+         video: "https://exemplo.com/video.mp4"        → vídeo direto
+         video: '<iframe src="..." ...></iframe>'       → iframe bruto
+       ============================================================ */
+    function VideoSlot({ video, dayColor }) {
+      // Não renderiza nada se não houver vídeo definido
+      if (!video) return null;
+
+      const isIframe  = video.trim().startsWith("<iframe");
+      const isYoutube = !isIframe && (video.includes("youtube.com") || video.includes("youtu.be"));
+
+      /** Converte qualquer formato de URL do YouTube para URL de embed. */
+      function getYoutubeEmbed(url) {
+        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+        return match ? `https://www.youtube.com/embed/${match[1]}?rel=0` : url;
+      }
+
+      // Iframe HTML bruto: renderiza diretamente (sem padding-bottom trick)
+      if (isIframe) {
+        return (
+          <div style={{ paddingLeft: 24, marginTop: 8 }}>
+            <div style={{ borderRadius: 8, overflow: "hidden", lineHeight: 0, border: `1px solid ${dayColor}20` }}
+              dangerouslySetInnerHTML={{ __html: video }}
+            />
+          </div>
+        );
+      }
+
+      // YouTube ou vídeo direto: usa a classe .video-container (proporção 16:9)
+      return (
+        <div style={{ paddingLeft: 24, marginTop: 8 }}>
+          <div className="video-container" style={{ border: `1px solid ${dayColor}20` }}>
+            {isYoutube ? (
+              <iframe
+                src={getYoutubeEmbed(video)}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="Vídeo do exercício"
+              />
+            ) : (
+              <video controls>
+                <source src={video} />
+                Seu navegador não suporta vídeo HTML5.
+              </video>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* ============================================================
+       COMPONENTE: ExerciseCard
+       Renderiza um exercício com todas as interações:
+         1. Checkbox de conclusão (persiste + feedback visual)
+         2. Campo de peso utilizado (persiste automaticamente)
+         3. Campo de repetições realizadas (persiste automaticamente)
+         4. Área de vídeo (oculta quando sem vídeo)
+       
+       Design original 100% preservado — apenas adições mínimas.
+       ============================================================ */
+    function ExerciseCard({ ex, dayColor, isLast, isSpecialSet }) {
+      // Carrega estado persistido (ou padrão) ao montar o componente
+      const [data, setData] = useState(() => loadExData(ex.id));
+      const { done, peso, reps } = data;
+
+      // Séries "especiais" são as de cardio/tempo — não exibem campos de peso/reps
+      const special    = isSpecialSet(ex.sets);
+      const showFields = !special && ex.reps !== "—";
+
+      /** Atualiza um campo e persiste no localStorage imediatamente. */
+      function update(field, value) {
+        const next = { ...data, [field]: value };
+        setData(next);
+        saveExData(ex.id, next);
+      }
+
+      return (
+        <div style={{
+          padding: "13px 16px",
+          borderBottom: !isLast ? "1px solid #16161E" : "none",
+          /* Feedback visual sutil quando exercício está concluído */
+          opacity: done ? 0.5 : 1,
+          transition: "opacity 0.2s ease",
+        }}>
+
+          {/* ── Linha 1: Checkbox + Nome + Badges de séries ── */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 7 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 8, flex: 1 }}>
+
+              {/* Checkbox interativo — marcação de exercício concluído */}
+              <button
+                className="ex-checkbox"
+                onClick={() => update("done", !done)}
+                title={done ? "Desmarcar exercício" : "Marcar como concluído"}
+                aria-label={done ? "Desmarcar exercício" : "Marcar exercício como concluído"}
+                aria-pressed={done}
+                style={{
+                  border:      `1.5px solid ${done ? dayColor : "#2A2A42"}`,
+                  background:  done ? dayColor : "transparent",
+                }}
+              >
+                {/* Checkmark visível apenas quando marcado */}
+                {done && "✓"}
+              </button>
+
+              {/* Nome do exercício — levemente acinzentado quando concluído */}
+              <div style={{
+                fontSize: 13, fontWeight: 700,
+                color: done ? "#555" : "#DDD",
+                flex: 1, paddingRight: 8,
+                transition: "color 0.2s ease",
+              }}>
+                {ex.name}
+              </div>
+            </div>
+
+            {/* Badges de séries × repetições — lógica original preservada */}
+            <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+              {!special && ex.reps !== "—" && (<>
+                <span style={{ background: `${dayColor}22`, border: `1px solid ${dayColor}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: dayColor }}>{ex.sets}×</span>
+                <span style={{ background: "#1E1E2A", borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: "#777" }}>{ex.reps}</span>
+              </>)}
+              {(special || ex.reps === "—") && (
+                <span style={{ background: `${dayColor}22`, border: `1px solid ${dayColor}40`, borderRadius: 5, padding: "2px 7px", fontSize: 10, fontWeight: 700, color: dayColor }}>
+                  {ex.reps !== "—" ? `${ex.sets} · ${ex.reps}` : ex.sets}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* ── Linha 2: Descanso + Nota — original sem alteração ── */}
+          <div style={{ display: "flex", gap: 7, alignItems: "flex-start", paddingLeft: 24 }}>
+            {ex.rest !== "—" && ex.rest !== "Sem pausa" && (
+              <span style={{ background: "#16161E", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#3A3A55", letterSpacing: 1, flexShrink: 0 }}>⏱ {ex.rest}</span>
+            )}
+            {ex.rest === "Sem pausa" && (
+              <span style={{ background: "#E8523A18", borderRadius: 4, padding: "1px 6px", fontSize: 9, fontWeight: 700, color: "#E8523A", letterSpacing: 1, flexShrink: 0 }}>🔥 SEM PAUSA</span>
+            )}
+            <span style={{ fontSize: 11, color: "#4A4A60", lineHeight: 1.4 }}>{ex.note}</span>
+          </div>
+
+          {/* ── Linha 3: Campos de Peso e Repetições realizadas ── */}
+          {/* Ocultados em exercícios de cardio/tempo (aquecimento, cardio final) */}
+          {showFields && (
+            <div className="ex-fields-row">
+
+              {/* Campo: Peso utilizado */}
+              <span className="ex-field-label">Peso</span>
+              <input
+                type="text"
+                className="exercise-input"
+                value={peso}
+                onChange={e => update("peso", e.target.value)}
+                placeholder="—"
+                inputMode="decimal"
+                aria-label="Peso utilizado em kg"
+                /* Cor do dia quando preenchido, neutro quando vazio */
+                style={{ color: peso ? dayColor : undefined }}
+              />
+              <span className="ex-field-unit">kg</span>
+
+              <div className="ex-field-divider" />
+
+              {/* Campo: Repetições realizadas */}
+              <span className="ex-field-label">Reps</span>
+              <input
+                type="text"
+                className="exercise-input"
+                value={reps}
+                onChange={e => update("reps", e.target.value)}
+                placeholder="—"
+                inputMode="numeric"
+                aria-label="Repetições realizadas"
+                style={{ width: 40 }}
+              />
+            </div>
+          )}
+
+          {/* ── Área de Vídeo — oculta quando ex.video não definido ── */}
+          <VideoSlot video={ex.video} dayColor={dayColor} />
+        </div>
+      );
+    }
+
+    /* ============================================================
+       COMPONENTE: SectionAccordion
+       Encapsula uma seção de treino (ex: PEITO, TRÍCEPS) com
+       accordion interativo e lista de ExerciseCards.
+       ============================================================ */
+    function SectionAccordion({ section, dayId, dayColor, isOpen, onToggle, isSpecialSet }) {
+      return (
+        <div style={{ marginBottom: 10 }}>
+          {/* Botão de abertura/fechamento da seção */}
+          <button
+            className={`section-toggle${isOpen ? " open" : ""}`}
+            onClick={onToggle}
+            aria-expanded={isOpen}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+              <span style={{ fontSize: 15 }}>{section.icon}</span>
+              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: "#CCC", textTransform: "uppercase" }}>{section.name}</span>
+              {/* Badge com contagem de exercícios */}
+              <span style={{ background: "#1E1E2A", borderRadius: 4, padding: "2px 7px", fontSize: 10, color: "#444", fontWeight: 600 }}>
+                {section.exercises.length}
+              </span>
+            </div>
+            {/* Seta animada indica estado aberto/fechado */}
+            <span style={{ color: "#333", fontSize: 12, display: "inline-block", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s ease" }}>▼</span>
+          </button>
+
+          {/* Lista de exercícios — visível apenas quando aberto */}
+          {isOpen && (
+            <div style={{ background: "#11111A", border: "1px solid #1E1E2A", borderTop: "none", borderRadius: "0 0 10px 10px", overflow: "hidden" }}>
+              {section.exercises.map((ex, ei) => (
+                <ExerciseCard
+                  key={ex.id}
+                  ex={ex}
+                  dayColor={dayColor}
+                  isLast={ei === section.exercises.length - 1}
+                  isSpecialSet={isSpecialSet}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* ============================================================
+       COMPONENTE: TreinoPage
+       Página completa de treino com seletor de dias, header do
+       dia e seções accordion com exercícios interativos.
+       ============================================================ */
+    function TreinoPage() {
+      const [activeDay,       setActiveDay]       = useState(0);
+      const [expandedSection, setExpandedSection] = useState(null);
+
+      const day = PLAN_DATA.days[activeDay];
+
+      /**
+       * Identifica séries "especiais" (cardio/tempo) que não devem
+       * exibir campos de peso/reps.
+       */
+      const isSpecialSet = (s) => ["5 min", "12 min", "10 min", "8 min", "2×"].includes(s);
+
+      /** Ao trocar de dia, fecha qualquer seção aberta. */
+      function handleDayChange(index) {
+        setActiveDay(index);
+        setExpandedSection(null);
+      }
+
+      return (
+        <section className="page">
+
+          {/* Cabeçalho sticky da página */}
+          <header className="dash-header">
+            <div className="dash-header-tag">Plano Elite · 5×/semana</div>
+            <h1 className="dash-header-title">TREINO</h1>
+            <p className="dash-header-sub">Selecione o dia e registre sua performance ⚡</p>
+          </header>
+
+          {/* Seletor de dias — scroll horizontal sem scrollbar visível */}
+          <div className="day-pills" role="tablist" aria-label="Dias de treino">
+            {PLAN_DATA.days.map((d, i) => (
+              <button
+                key={d.id}
+                role="tab"
+                aria-selected={activeDay === i}
+                onClick={() => handleDayChange(i)}
+                style={{
+                  flex: "0 0 auto",
+                  background:   activeDay === i ? d.color : "#16161E",
+                  border:       activeDay === i ? "none"  : "1px solid #22222E",
+                  borderRadius: 10,
+                  padding:      "10px 18px",
+                  transition:   "all 0.15s ease",
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: activeDay === i ? "#fff" : "#444", textTransform: "uppercase" }}>
+                  {d.label}
+                </div>
+              </button>
+            ))}
+            {/* Sábado — dia de descanso (não interativo) */}
+            <button style={{ flex: "0 0 auto", background: "#16161E", border: "1px solid #1A1A22", borderRadius: 10, padding: "10px 18px", cursor: "default" }} aria-disabled="true">
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: "#2A2A38", textTransform: "uppercase" }}>SAB</div>
+            </button>
+          </div>
+
+          {/* Card de cabeçalho do dia ativo */}
+          <div style={{
+            margin: "16px 20px 12px",
+            borderRadius: 14,
+            background: `linear-gradient(135deg, ${day.color}20 0%, #12121A 100%)`,
+            border: `1px solid ${day.color}30`,
+            padding: "18px 20px",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 9, color: day.color, fontWeight: 800, letterSpacing: 3, textTransform: "uppercase", marginBottom: 4 }}>
+                  {day.fullLabel} · {day.tag}
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: -0.5, color: "#F0F0F0" }}>{day.title}</div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 9, color: "#444", letterSpacing: 1, textTransform: "uppercase" }}>Duração</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: day.color }}>{day.duration}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Lista de seções accordion */}
+          <div style={{ padding: "0 20px 80px" }}>
+            {day.sections.map((section, si) => (
+              <SectionAccordion
+                key={`${day.id}-s${si}`}
+                section={section}
+                dayId={day.id}
+                dayColor={day.color}
+                isOpen={expandedSection === si}
+                onToggle={() => setExpandedSection(expandedSection === si ? null : si)}
+                isSpecialSet={isSpecialSet}
+              />
+            ))}
+            {/* Dica quando nenhuma seção está aberta */}
+            {expandedSection === null && (
+              <div style={{ textAlign: "center", padding: "20px 0", color: "#2A2A38", fontSize: 11, letterSpacing: 1 }}>
+                Toque em uma seção para ver os exercícios ↑
+              </div>
+            )}
+          </div>
+        </section>
+      );
+    }
+
+    /* ============================================================
+       COMPONENTE: ProgressRing — original sem modificação
+       ============================================================ */
+    function ProgressRing({ value, max, color, size = 64 }) {
+      const r    = (size / 2) - 6;
+      const circ = 2 * Math.PI * r;
+      const fill = circ - (value / max) * circ;
+      
+      return (
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-label={`${value}% progresso`}>
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#1E1E2A" strokeWidth="5"/>
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth="5"
+            strokeDasharray={circ} strokeDashoffset={fill}
+            strokeLinecap="round" transform={`rotate(-90 ${size/2} ${size/2})`}
+            style={{ transition: "stroke-dashoffset 1s ease" }}/>
+          <text x={size/2} y={size/2+1} textAnchor="middle" dominantBaseline="middle" fill="#F0F0F0" fontSize="11" fontWeight="900">
+            {value}%
+          </text>
+        </svg>
+      );
+    }
+    
+    /* ============================================================
+       COMPONENTE: DashboardPage — original sem modificação
+       ============================================================ */
+    function DashboardPage() {
+      const [water, setWater] = useState(5);
+      const days  = ["SEG", "TER", "QUA", "QUI", "SEX", "SAB", "DOM"];
+      const done  = [0, 1, 2];
+      const today = 3;
+      
+      const metrics = [
+        { icon: "⚡", label: "Treinos",         value: "12",   sub: "este mês",       bar: 0.4,  color: "#E8523A" },
+        { icon: "🔥", label: "Kcal queimadas",  value: "8.4k", sub: "acumulado",       bar: 0.6,  color: "#E8A23A" },
+        { icon: "💪", label: "Volume total",    value: "148t", sub: "carga levantada", bar: 0.5,  color: "#3A7BE8" },
+        { icon: "😴", label: "Recuperação",     value: "87%",  sub: "média semanal",   bar: 0.87, color: "#2EAF6B" },
+      ];
+      
+      return (
+        <section className="page">
+          <header className="dash-header">
+            <div className="dash-header-tag">FitPlanner · Elite</div>
+            <h1 className="dash-header-title">Dashboard</h1>
+            <p className="dash-header-sub">Bem-vindo de volta — continue de onde parou 🔥</p>
+          </header>
+          
+          <div className="dash-body">
+            {/* Métricas */}
+            <div className="metrics-grid">
+              {metrics.map((m, i) => (
+                <article className="metric-card" key={i}>
+                  <div className="metric-icon">{m.icon}</div>
+                  <div className="metric-label">{m.label}</div>
+                  <div className="metric-value">{m.value}</div>
+                  <div className="metric-sub">{m.sub}</div>
+                  <div className="metric-bar">
+                    <div className="metric-bar-fill" style={{ width: `${m.bar * 100}%`, background: m.color }} />
+                  </div>
+                </article>
+              ))}
+            </div>
+            
+            {/* Semana */}
+            <article className="dash-card" style={{ marginBottom: "12px" }}>
+              <h2 className="dash-card-title">Semana atual</h2>
+              <div className="week-strip">
+                {days.map((d, i) => (
+                  <div key={i} className={`week-day${done.includes(i) ? " done" : ""}${i === today ? " today" : ""}`}>
+                    <div className="week-day-label">{d}</div>
+                    <div className="week-day-dot" />
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: "11px", color: "#3A3A55" }}>3 de 5 treinos concluídos esta semana</p>
+            </article>
+            
+            <div className="dash-grid-2">
+              {/* Água */}
+              <article className="dash-card">
+                <h2 className="dash-card-title">💧 Água hoje</h2>
+                <div style={{ fontSize: "22px", fontWeight: "900", color: "#3A7BE8", letterSpacing: "-1px", marginBottom: "8px" }}>
+                  {(water * 0.3).toFixed(1)}L <span style={{ fontSize: "12px", color: "#444", fontWeight: "600" }}>/ 3L</span>
+                </div>
+                <div className="water-cups">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <button key={i} className={`water-cup${i < water ? " filled" : ""}`} onClick={() => setWater(i < water ? i : i + 1)} aria-label={`Copo ${i + 1}`}>
+                      {i < water ? "💧" : "○"}
+                    </button>
+                  ))}
+                </div>
+              </article>
+              
+              {/* Progresso visual */}
+              <article className="dash-card">
+                <h2 className="dash-card-title">Progresso do plano</h2>
+                <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+                  <div style={{ textAlign: "center" }}>
+                    <ProgressRing value={40} max={100} color="#E8523A" size={64} />
+                    <div style={{ fontSize: "9px", color: "#444", letterSpacing: "1px", marginTop: "6px", textTransform: "uppercase" }}>Geral</div>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <ProgressRing value={60} max={100} color="#2EAF6B" size={64} />
+                    <div style={{ fontSize: "9px", color: "#444", letterSpacing: "1px", marginTop: "6px", textTransform: "uppercase" }}>Dieta</div>
+                  </div>
+                  <div style={{ textAlign: "center" }}>
+                    <ProgressRing value={87} max={100} color="#3A7BE8" size={64} />
+                    <div style={{ fontSize: "9px", color: "#444", letterSpacing: "1px", marginTop: "6px", textTransform: "uppercase" }}>Sono</div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+      );
+    }
+    
+    /* ============================================================
+       COMPONENTE: App — original com apenas 1 modificação:
+       renderPage() agora roteia "treino" para <TreinoPage />.
+       Todo o resto (sidebar, mobile nav, shell) é idêntico.
+       ============================================================ */
+    function App() {
+      const [page, setPage] = useState("dashboard");
+      
+      /** Roteamento de páginas — única alteração no App original */
+      const renderPage = () => {
+        switch (page) {
+          case "dashboard": return <DashboardPage />;
+          case "treino":    return <TreinoPage />;    // ← ADICIONADO
+          default:          return <DashboardPage />; // Demais páginas: placeholder
+        }
+      };
+      
+      return (
+        <>
+          {/* Sidebar Desktop */}
+          <aside className="sidebar" role="navigation">
+            <div className="sidebar-logo">
+              <div className="sidebar-logo-tag">Elite Training System</div>
+              <h1 className="sidebar-logo-name">Fit<span>Planner</span></h1>
+            </div>
+            <nav className="sidebar-nav">
+              <div className="nav-section-label">Menu Principal</div>
+              {NAV.map(n => (
+                <button key={n.id} className={`nav-item${page === n.id ? " active" : ""}`} onClick={() => setPage(n.id)} aria-current={page === n.id ? "page" : undefined}>
+                  <span className="nav-icon">{n.icon}</span>
+                  {n.label}
+                  <div className="nav-dot" />
+                </button>
+              ))}
+              <div className="nav-section-label" style={{ marginTop: "20px" }}>Plano Atual</div>
+              <div style={{ background: "#16161E", border: "1px solid #E8523A30", borderRadius: "10px", padding: "12px 14px", margin: "0 2px" }}>
+                <div style={{ fontSize: "8px", letterSpacing: "2px", color: "#E8523A", fontWeight: "700", textTransform: "uppercase", marginBottom: "4px" }}>Elite 30D</div>
+                <div style={{ fontSize: "12px", fontWeight: "800", color: "#CCC", marginBottom: "6px" }}>Semana 2 · Dia 9</div>
+                <div style={{ height: "4px", background: "#1A1A22", borderRadius: "2px", overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: "40%", background: "linear-gradient(90deg,#E8523A,#C44FD8)", borderRadius: "2px" }} />
+                </div>
+                <div style={{ fontSize: "9px", color: "#444", marginTop: "5px" }}>40% concluído</div>
+              </div>
+            </nav>
+            <footer className="sidebar-footer">
+              <div className="user-chip">
+                <div className="user-avatar">E</div>
+                <div>
+                  <div className="user-name">Elite Athlete</div>
+                  <div className="user-plan">Plano Elite</div>
+                </div>
+              </div>
+            </footer>
+          </aside>
+          
+          {/* Mobile Top Bar */}
+          <header className="mobile-topbar">
+            <h1 className="mobile-logo">Fit<span>Planner</span></h1>
+            <div className="elite-badge" style={{ fontSize: "8px", padding: "3px 8px" }}>Elite 30D</div>
+          </header>
+          
+          {/* Main Content */}
+          <main className="main-area">
+            {renderPage()}
+          </main>
+          
+          {/* Mobile Bottom Navigation */}
+          <nav className="mobile-bottomnav" role="navigation">
+            {NAV.map(n => (
+              <button key={n.id} className={`mobile-nav-btn${page === n.id ? " active" : ""}`} onClick={() => setPage(n.id)} aria-current={page === n.id ? "page" : undefined}>
+                <div className="mobile-nav-icon">{n.mIcon}</div>
+                {n.label}
+              </button>
+            ))}
+          </nav>
+        </>
+      );
+    }
+    
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
